@@ -1,4 +1,5 @@
 import UIKit
+import MixedSourceFramework
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -14,6 +15,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         mainWindow.rootViewController = ViewController()
         mainWindow.makeKeyAndVisible()
+
+        Logger.sharedInstance().log(withMessage: "Hello World")
 
         return true
     }
