@@ -1,0 +1,15 @@
+load("//rules:framework.bzl", "apple_framework")
+load("//rules:app.bzl", "ios_application")
+
+apple_framework(
+    name = "MixedSourceFramework",
+    srcs = glob(["MixedSourceFramework/**"])
+)
+
+ios_application(
+    name = "App",
+    srcs = glob(["App/Source/**"]),
+    bundle_id = "com.example.app",
+    minimum_os_version = "10.0",
+    deps = [":MixedSourceFramework"]
+)
