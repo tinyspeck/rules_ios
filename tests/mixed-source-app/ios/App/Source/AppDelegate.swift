@@ -16,7 +16,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         mainWindow.rootViewController = ViewController()
         mainWindow.makeKeyAndVisible()
 
-        Logger.sharedInstance().log(withMessage: "Hello World")
+        DoubleQuoteNamespacedLogger().log(withMessage: "Hello World, from DoubleQuoteNamespacedLogger")
+
+        DoubleQuoteLogger().log(withMessage: "Hello World, from DoubleQuoteLogger")
+
+        let swiftLogger = SwiftLogger()
+        swiftLogger.swiftLog("Hello World, from SwiftLogger!")
 
         return true
     }

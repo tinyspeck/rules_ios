@@ -3,13 +3,25 @@ load("//rules:app.bzl", "ios_application")
 
 apple_framework(
     name = "MixedSourceFramework",
-    srcs = glob(["MixedSourceFramework/**"])
+    srcs = glob(
+        [
+            "MixedSourceFramework/**/*.h",
+            "MixedSourceFramework/**/*.m",
+            "MixedSourceFramework/**/*.swift",
+        ],
+        exclude = ["MixedSourceFramework/MixedSourceFramework.h"],
+    ),
+    visibility = ["//visibility:public"],
 )
 
 ios_application(
     name = "App",
-    srcs = glob(["App/Source/**"]),
+    srcs = glob([
+        "App/Source/**/*.h",
+        "App/Source/**/*.m",
+        "App/Source/**/*.swift",
+    ]),
     bundle_id = "com.example.app",
     minimum_os_version = "10.0",
-    deps = [":MixedSourceFramework"]
+    deps = [":MixedSourceFramework"],
 )

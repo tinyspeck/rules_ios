@@ -1,13 +1,11 @@
-#ifndef Logger_h
-#define Logger_h
+#ifndef DoubleQuoteLogger_h
+#define DoubleQuoteLogger_h
 
 #import <Foundation/Foundation.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface Logger: NSObject
-
-+ (instancetype)sharedInstance;
+@interface DoubleQuoteLogger: NSObject
 
 - (void)logWithMessage:(NSString *)message;
 
@@ -15,4 +13,4 @@ NS_ASSUME_NONNULL_BEGIN
 
 NS_ASSUME_NONNULL_END
 
-#endif /* Logger_h */
+#endif /* DoubleQuoteLogger_h */
