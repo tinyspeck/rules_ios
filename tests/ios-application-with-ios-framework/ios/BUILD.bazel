@@ -1,0 +1,31 @@
+load("//rules:app.bzl", "ios_application")
+load("@build_bazel_rules_apple//apple:ios.bzl", "ios_framework")
+load("@build_bazel_rules_swift//swift:swift.bzl", "swift_library")
+
+ios_framework(
+    name = "MySwiftFramework",
+    deps = [":MySwiftFrameworkLib"],
+    bundle_id = "com.myorg.MySwiftFramework",
+    infoplists = ["MySwiftFramework/Info.plist"],
+    minimum_os_version = "13.0",
+    families = [
+        "iphone",
+        "ipad",
+    ],
+    resources = ["MySwiftFramework/example-resource.txt"],
+)
+
+swift_library(
+    name = "MySwiftFrameworkLib",
+    srcs = glob(["MySwiftFramework/**/*.swift"]),
+)
+
+ios_application(
+    name = "MySwiftApp",
+    bundle_id = "com.myorg.myswiftapp",
+    srcs = glob(["MySwiftApp/**/*.swift"]),
+    deps = [
+        ":MySwiftFramework"
+    ],
+    minimum_os_version = "13.0"
+)

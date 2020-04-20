@@ -10,6 +10,7 @@ _IOS_APPLICATION_KWARGS = [
     "entitlements",
     "visibility",
     "launch_storyboard",
+    "frameworks",
 ]
 
 def ios_application(name, apple_library = apple_library, **kwargs):
