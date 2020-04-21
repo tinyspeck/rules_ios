@@ -1,4 +1,5 @@
 load("@build_bazel_rules_swift//swift:swift.bzl", "SwiftInfo")
+load("@build_bazel_rules_apple//apple:providers.bzl", "IosFrameworkBundleInfo")
 
 def _make_headermap_input_file(namespace, hdrs, flatten_headers):
     """Create a string representing the mappings from headers to their
@@ -70,6 +71,8 @@ def _make_headermap_impl(ctx):
             hdrs.extend(hdr_provider[apple_common.Objc].header.to_list())
         elif CcInfo in hdr_provider:
             hdrs.extend(hdr_provider[CcInfo].compilation_context.headers.to_list())
+        elif IosFrameworkBundleInfo in hdr_provider:
+            pass
         else:
             fail("hdr_provider must contain either 'CcInfo' or 'objc' provider")
 
@@ -147,8 +150,8 @@ headermap = rule(
             mandatory = False,
             doc = """\
 Targets that provide headers.
-Targets must have either an Objc or CcInfo provider.""",
-            providers = [[apple_common.Objc], [CcInfo]],
+Targets must have either an Objc, CcInfo or IosFrameworkBundleInfo provider.""",
+            providers = [[apple_common.Objc], [CcInfo], [IosFrameworkBundleInfo]],
         ),
         "_headermap_builder": attr.label(
             executable = True,
