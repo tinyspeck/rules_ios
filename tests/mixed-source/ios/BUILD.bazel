@@ -12,3 +12,9 @@ apple_framework(
     ),
     visibility = ["//visibility:public"],
 )
+
+apple_framework(
+    name = "DependsOnMixedSourceFramework",
+    srcs = glob(["DependsOnMixedSourceFramework/**/*.swift"]),
+    deps = [":MixedSourceFramework"]
+)
