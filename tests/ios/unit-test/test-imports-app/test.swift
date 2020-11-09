@@ -6,4 +6,11 @@ class SwiftTests : XCTestCase {
       _ = EmptyStruct()
       XCTAssertTrue(true)
   }
+
+  func testPasses2() {
+      let empty = EmptyClass()
+      empty.embraceNothingness()
+
+      XCTAssertTrue(true)
+  }
 }

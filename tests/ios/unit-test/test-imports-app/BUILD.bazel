@@ -16,6 +16,8 @@ ios_application(
     srcs = [
         "Header.h",
         "Header2.h",
+        "Car.h",
+        "Car.m",
         "empty.swift",
         "main.m",
     ],
@@ -26,6 +28,7 @@ ios_application(
         ["Resources/**/*"],
         exclude_directories = 0,
     )},
+    swift_objc_bridging_header = "test-imports-app-Bridging-Header.h",
     sdk_frameworks = ["UIKit"],
     visibility = ["//visibility:public"],
     deps = [
@@ -63,7 +66,7 @@ ios_unit_test(
     minimum_os_version = "12.0",
     module_name = "TestImports_Unit_Tests",
     sdk_frameworks = ["XCTest"],
-    test_host = ":TestImports-App",
+    test_host = True,
     # Adding visibility so the xcodeproject tests can depend on this target
     visibility = ["//visibility:public"],
     deps = [
