@@ -9,8 +9,10 @@ _IOS_APPLICATION_KWARGS = [
     "test_host",
     "families",
     "entitlements",
+    "extensions",
     "visibility",
     "launch_storyboard",
+    "provisioning_profile",
     "resources",
     "app_icons",
     "tags",
@@ -71,7 +73,7 @@ def ios_application(name, apple_library = apple_library, **kwargs):
 
     rules_apple_ios_application(
         name = name,
-        deps = library.deps + select({
+        deps = library.lib_names + select({
             "@build_bazel_rules_ios//rules:local_debug_options": local_debug_options_for_swift,
             "//conditions:default": [],
         }),
