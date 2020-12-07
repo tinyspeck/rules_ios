@@ -23,6 +23,10 @@ _ARCH_MAPPING = {
     "macos": "i386 x86_64",
 }
 
+# Target build systems
+_BAZEL = "bazel"
+_XCODEBUILD = "xcodebuild"
+
 _PRODUCT_SPECIFIER_LENGTH = len("com.apple.product-type.")
 
 _IGNORE_AS_TARGET_TAG = "xcodeproj-ignore-as-target"
@@ -680,8 +684,7 @@ def _xcodeproj_impl(ctx):
         "settingPresets": "none",
     }
 
-    build_with_xcodebuild = ctx.attr.build_with_xcodebuild
-    proj_settings = _xcodebuild_proj_settings() if build_with_xcodebuild else _bazel_proj_settings(ctx, script_dot_dots)
+    proj_settings = _xcodebuild_proj_settings() if ctx.attr.target_build_system == _XCODEBUILD else _bazel_proj_settings(ctx, script_dot_dots)
 
     targets = []
     all_transitive_targets = depset(transitive = _get_attr_values_for_name(ctx.attr.deps, _TargetInfo, "targets")).to_list()
@@ -802,7 +805,7 @@ Product types must be valid apple product types, e.g. application, bundle.unit-t
 For a full list, see under keys of `PRODUCT_TYPE_UTI` under
 https://www.rubydoc.info/github/CocoaPods/Xcodeproj/Xcodeproj/Constants
 """),
-        "build_with_xcodebuild": attr.bool(default = False, mandatory = False, doc = "The generated Xcode project will build with xcodebuild instead of Bazel."),
+        "target_build_system": attr.string(default = "bazel", doc = "The build system that the generated project should use: 'bazel' (the default) or 'xcodebuild' (experimental)", mandatory = False, values = [_BAZEL, _XCODEBUILD]),
         "_xcodeproj_installer_template": attr.label(executable = False, default = Label("//tools/xcodeproj_shims:xcodeproj-installer.sh"), allow_single_file = ["sh"]),
         "_infoplist_stub": attr.label(executable = False, default = Label("//rules/test_host_app:Info.plist"), allow_single_file = ["plist"]),
         "_workspace_xcsettings": attr.label(executable = False, default = Label("//tools/xcodeproj_shims:WorkspaceSettings.xcsettings"), allow_single_file = ["xcsettings"]),
