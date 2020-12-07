@@ -757,6 +757,7 @@ def _xcodeproj_impl(ctx):
             "$(output_processor_path)": ctx.file.output_processor.short_path,
             "$(workspacesettings_xcsettings_short_path)": ctx.file._workspace_xcsettings.short_path,
             "$(ideworkspacechecks_plist_short_path)": ctx.file._workspace_checks.short_path,
+            "$(target_build_system)": ctx.attr.target_build_system,
         },
         is_executable = True,
     )
