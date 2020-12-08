@@ -23,6 +23,10 @@ _ARCH_MAPPING = {
     "macos": "i386 x86_64",
 }
 
+# Target build systems
+_BAZEL = "bazel"
+_XCODEBUILD = "xcodebuild"
+
 _PRODUCT_SPECIFIER_LENGTH = len("com.apple.product-type.")
 
 _IGNORE_AS_TARGET_TAG = "xcodeproj-ignore-as-target"
@@ -498,17 +502,19 @@ def _populate_xcodeproj_targets_and_schemes(ctx, targets, src_dot_dots, all_tran
 
         target_settings = {
             "PRODUCT_NAME": target_name,
-            "BAZEL_BIN_SUBDIR": target_info.bazel_bin_subdir,
             "MACH_O_TYPE": target_macho_type,
             "CLANG_ENABLE_MODULES": "YES",
             "CLANG_ENABLE_OBJC_ARC": "YES",
-            "BAZEL_BUILD_TARGET_LABEL": target_info.bazel_build_target_name,
-            "BAZEL_BUILD_TARGET_WORKSPACE": target_info.bazel_build_target_workspace,
         }
-
-        target_settings["BAZEL_SWIFTMODULEFILES_TO_COPY"] = _swiftmodulepaths_for_target(target_name, all_transitive_targets)
-        target_settings["HEADER_SEARCH_PATHS"] = _header_search_paths_for_target(target_name, all_transitive_targets)
-        target_settings["FRAMEWORK_SEARCH_PATHS"] = _framework_search_paths_for_target(target_name, all_transitive_targets)
+        if ctx.attr.target_build_system == _BAZEL:
+            target_settings.update({
+                "BAZEL_BIN_SUBDIR": target_info.bazel_bin_subdir,
+                "BAZEL_BUILD_TARGET_LABEL": target_info.bazel_build_target_name,
+                "BAZEL_BUILD_TARGET_WORKSPACE": target_info.bazel_build_target_workspace,
+                "BAZEL_SWIFTMODULEFILES_TO_COPY": _swiftmodulepaths_for_target(target_name, all_transitive_targets),
+                "HEADER_SEARCH_PATHS": _header_search_paths_for_target(target_name, all_transitive_targets),
+                "FRAMEWORK_SEARCH_PATHS": _framework_search_paths_for_target(target_name, all_transitive_targets),
+            })
 
         macros = ["\"%s\"" % d for d in target_info.cc_defines.to_list()]
         macros.append("$(inherited)")
@@ -525,13 +531,15 @@ def _populate_xcodeproj_targets_and_schemes(ctx, targets, src_dot_dots, all_tran
         target_settings["SWIFT_ACTIVE_COMPILATION_CONDITIONS"] = " ".join(
             ["\"%s\"" % d for d in defines_without_equal_sign],
         )
-        target_settings["BAZEL_LLDB_SWIFT_EXTRA_CLANG_FLAGS"] = " ".join(
-            ["-D%s" % d for d in target_info.cc_defines.to_list()],
-        )
+        if ctx.attr.target_build_system == _BAZEL:
+            target_settings["BAZEL_LLDB_SWIFT_EXTRA_CLANG_FLAGS"] = " ".join(
+                ["-D%s" % d for d in target_info.cc_defines.to_list()],
+            )
 
         if product_type == "application":
-            target_settings["INFOPLIST_FILE"] = "$BAZEL_STUBS_DIR/Info-stub.plist"
             target_settings["PRODUCT_BUNDLE_IDENTIFIER"] = target_info.bundle_id
+            if ctx.attr.target_build_system == _BAZEL:
+                target_settings["INFOPLIST_FILE"] = "$BAZEL_STUBS_DIR/Info-stub.plist"
 
         if product_type == "bundle.unit-test":
             target_settings["SUPPORTS_MACCATALYST"] = False
@@ -543,6 +551,11 @@ def _populate_xcodeproj_targets_and_schemes(ctx, targets, src_dot_dots, all_tran
 
         target_settings["VALID_ARCHS"] = _ARCH_MAPPING[target_info.platform_type]
 
+        pre_build_scripts = [] if ctx.attr.target_build_system == _XCODEBUILD else [{
+            "name": "Build with bazel",
+            "script": _BUILD_WITH_BAZEL_SCRIPT,
+        }]
+
         xcodeproj_targets_by_name[target_name] = {
             "sources": compiled_sources + compiled_non_arc_sources + asset_sources,
             "type": product_type,
@@ -550,10 +563,7 @@ def _populate_xcodeproj_targets_and_schemes(ctx, targets, src_dot_dots, all_tran
             "deploymentTarget": target_info.minimum_os_version,
             "settings": target_settings,
             "dependencies": target_dependencies,
-            "preBuildScripts": [{
-                "name": "Build with bazel",
-                "script": _BUILD_WITH_BAZEL_SCRIPT,
-            }],
+            "preBuildScripts": pre_build_scripts,
         }
 
         # Skip a scheme generation if allowlist is not empty
@@ -680,8 +690,7 @@ def _xcodeproj_impl(ctx):
         "settingPresets": "none",
     }
 
-    build_with_xcodebuild = ctx.attr.build_with_xcodebuild
-    proj_settings = _xcodebuild_proj_settings() if build_with_xcodebuild else _bazel_proj_settings(ctx, script_dot_dots)
+    proj_settings = _xcodebuild_proj_settings() if ctx.attr.target_build_system == _XCODEBUILD else _bazel_proj_settings(ctx, script_dot_dots)
 
     targets = []
     all_transitive_targets = depset(transitive = _get_attr_values_for_name(ctx.attr.deps, _TargetInfo, "targets")).to_list()
@@ -754,6 +763,7 @@ def _xcodeproj_impl(ctx):
             "$(output_processor_path)": ctx.file.output_processor.short_path,
             "$(workspacesettings_xcsettings_short_path)": ctx.file._workspace_xcsettings.short_path,
             "$(ideworkspacechecks_plist_short_path)": ctx.file._workspace_checks.short_path,
+            "$(target_build_system)": ctx.attr.target_build_system,
         },
         is_executable = True,
     )
@@ -802,7 +812,7 @@ Product types must be valid apple product types, e.g. application, bundle.unit-t
 For a full list, see under keys of `PRODUCT_TYPE_UTI` under
 https://www.rubydoc.info/github/CocoaPods/Xcodeproj/Xcodeproj/Constants
 """),
-        "build_with_xcodebuild": attr.bool(default = False, mandatory = False, doc = "The generated Xcode project will build with xcodebuild instead of Bazel."),
+        "target_build_system": attr.string(default = "bazel", doc = "The build system that the generated project should use: 'bazel' (the default) or 'xcodebuild' (experimental)", mandatory = False, values = [_BAZEL, _XCODEBUILD]),
         "_xcodeproj_installer_template": attr.label(executable = False, default = Label("//tools/xcodeproj_shims:xcodeproj-installer.sh"), allow_single_file = ["sh"]),
         "_infoplist_stub": attr.label(executable = False, default = Label("//rules/test_host_app:Info.plist"), allow_single_file = ["plist"]),
         "_workspace_xcsettings": attr.label(executable = False, default = Label("//tools/xcodeproj_shims:WorkspaceSettings.xcsettings"), allow_single_file = ["xcsettings"]),
