@@ -47,30 +47,31 @@ def rules_ios_dependencies():
     _maybe(
         github_repo,
         name = "build_bazel_rules_apple",
-        ref = "572aee29236aa6aa850484d5706b79aa2a098219",
+        ref = "0.31.1",
         project = "bazelbuild",
         repo = "rules_apple",
-        sha256 = "1fff3fa1e565111a8f678b4698792101844f57b2e78c5e374431d0ebe97f6b6c",
+        sha256 = "0d95a266753e133302662721d0a924e0c57f198825d89813131a75e92ec6b1bb",
     )
 
+    # TODO: rebase fork on tag 0.20.0 of rules_swift.
     # Note: this ref is a cherry-pick of the rules_swift PR
     # https://github.com/bazelbuild/rules_swift/pull/567
     _maybe(
         github_repo,
         name = "build_bazel_rules_swift",
-        ref = "703165622cf87cabe253bf746a8129f8021ec001",
-        project = "bazel-ios",
+        ref = "0.20.0",
+        project = "bazelbuild",
         repo = "rules_swift",
-        sha256 = "cf553875aae12744846b5e484879098e9c9153883febfc4074aa9305765a923f",
+        sha256 = "7214a8e65b57c9d39eb2dd184c4eccef1e0dc03770dde917531ba315f94f851d",
     )
 
     _maybe(
         github_repo,
         name = "build_bazel_apple_support",
-        ref = "2583fa0bfd6909e7936da5b30e3547ba13e198dc",
+        ref = "0.10.0",
         project = "bazelbuild",
         repo = "apple_support",
-        sha256 = "9bec12891ac89db763f625c5f26975e104ace492f19ea37b664e1520897be761",
+        sha256 = "856ec8129b513443b11043cd96553b324ac87e5618b782af6dde6f8ddba52c43",
     )
 
     _maybe(
