@@ -158,7 +158,7 @@ FOUNDATION_EXPORT const unsigned char {module_name}VersionString[];
     )
     return destination
 
-def _generate_resource_bundles(name, library_tools, module_name, resource_bundles, platforms, **kwargs):
+def _generate_resource_bundles(name, library_tools, module_name, resource_bundles, **kwargs):
     bundle_target_names = []
     for bundle_name in resource_bundles:
         target_name = "%s-%s" % (name, bundle_name)
@@ -168,7 +168,6 @@ def _generate_resource_bundles(name, library_tools, module_name, resource_bundle
             resources = [
                 library_tools["wrap_resources_in_filegroup"](name = target_name + "_resources", srcs = resource_bundles[bundle_name]),
             ],
-            platforms = platforms,
             tags = _MANUAL,
         )
         bundle_target_names.append(target_name)
@@ -461,7 +460,6 @@ def apple_library(name, library_tools = {}, export_private_headers = True, names
         library_tools = library_tools,
         resource_bundles = kwargs.pop("resource_bundles", {}),
         module_name = module_name,
-        platforms = platforms,
         **kwargs
     )
     deps += resource_bundles
