@@ -677,15 +677,15 @@ def apple_library(name, library_tools = {}, export_private_headers = True, names
 
     additional_objc_copts.append("-I.")
     index_while_building_objc_copts = select({
-        "@build_bazel_rules_ios//:index_while_building_v2": [
-            # Note: this won't work work for remote caching yet. It uses a
-            # _different_ global index for objc than so that the BEP grep in
-            # rules_ios picks this up.
-            # Checkout the task roadmap for future improvements:
-            # Docs/index_while_building.md
-            "-index-store-path",
-            "bazel-out/rules_ios_global_index_store.indexstore",
-        ],
+        # "@build_bazel_rules_ios//:index_while_building_v2": [
+        #     # Note: this won't work work for remote caching yet. It uses a
+        #     # _different_ global index for objc than so that the BEP grep in
+        #     # rules_ios picks this up.
+        #     # Checkout the task roadmap for future improvements:
+        #     # Docs/index_while_building.md
+        #     "-index-store-path",
+        #     "bazel-out/rules_ios_global_index_store.indexstore",
+        # ],
         "//conditions:default": [
             "-index-store-path",
             "$(GENDIR)/{package}/rules_ios_objc_library_{libname}.indexstore".format(
