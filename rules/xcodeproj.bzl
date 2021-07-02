@@ -613,6 +613,10 @@ def _populate_xcodeproj_targets_and_schemes(ctx, targets, src_dot_dots, all_tran
             "script": _BUILD_WITH_BAZEL_SCRIPT,
         })
 
+        team_id = ctx.attr.team_id
+        if team_id:
+            target_settings["DEVELOPMENT_TEAM"] = team_id
+
         xcodeproj_targets_by_name[target_name] = {
             "sources": compiled_sources + compiled_non_arc_sources + asset_sources,
             "type": product_type,
@@ -933,6 +937,7 @@ https://www.rubydoc.info/github/CocoaPods/Xcodeproj/Xcodeproj/Constants
         "additional_bazel_build_options": attr.string_list(default = [], mandatory = False),
         "bazel_execution_log_enabled": attr.bool(default = False, mandatory = False),
         "bazel_profile_enabled": attr.bool(default = False, mandatory = False),
+        "team_id": attr.string(mandatory = False, doc = "Apple Developer team ID to assist in automatic signing.")
     },
     executable = True,
 )
